@@ -14,6 +14,45 @@ use super::codec::LanguageServerCodec;
 use super::message::Incoming;
 
 /// Server for processing requests and responses on `stdin` and `stdout`.
+///
+/// # Example
+///
+/// ```rust,no_run
+/// # use std::io::Cursor;
+/// #
+/// # use futures::{stream, Async, Poll};
+/// # use futures::future::{self, FutureResult};
+/// # use tokio::runtime::current_thread;
+/// # use tower_lsp::{Incoming, Server};
+/// # use tower_service::Service;
+/// #
+/// # struct MockService;
+/// #
+/// # impl Service<Incoming> for MockService {
+/// #     type Response = String;
+/// #     type Error = String;
+/// #     type Future = FutureResult<Self::Response, Self::Error>;
+/// #
+/// #     fn poll_ready(&mut self) -> Poll<(), Self::Error> {
+/// #         Ok(Async::Ready(()))
+/// #     }
+/// #
+/// #     fn call(&mut self, request: Incoming) -> Self::Future {
+/// #         future::ok(request.to_string())
+/// #     }
+/// # }
+/// #
+/// # let service = MockService;
+/// # let messages = stream::empty();
+/// let stdin = tokio::io::stdin();
+/// let stdout = tokio::io::stdout();
+///
+/// let server = Server::new(stdin, stdout)
+///     .interleave(messages)
+///     .serve(service);
+///
+/// tokio::spawn(server);
+/// ```
 #[derive(Debug)]
 pub struct Server<I, O, S = Nothing> {
     stdin: I,
