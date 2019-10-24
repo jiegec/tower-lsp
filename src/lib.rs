@@ -53,6 +53,10 @@
 //!     fn document_highlight(&self, _: TextDocumentPositionParams) -> Self::HighlightFuture {
 //!         Box::new(future::ok(None))
 //!     }
+//!
+//!     fn document_symbol(&self, _: DocumentSymbolParams) -> Self::DocumentSymbolFuture {
+//!         Box::new(future::ok(None))
+//!     }
 //! }
 //!
 //! fn main() {
@@ -110,6 +114,8 @@ pub trait LanguageServer: Send + Sync + 'static {
     type HoverFuture: Future<Item = Option<Hover>, Error = Error> + Send;
     /// Response returned when a document highlight action is requested.
     type HighlightFuture: Future<Item = Option<Vec<DocumentHighlight>>, Error = Error> + Send;
+    /// Response returned when a document symbol action is requested.
+    type DocumentSymbolFuture: Future<Item = Option<DocumentSymbolResponse>, Error = Error> + Send;
 
     /// The [`initialize`] request is the first request sent from the client to the server.
     ///
@@ -270,6 +276,12 @@ pub trait LanguageServer: Send + Sync + 'static {
     ///
     /// [`textDocument/documentHighlight`]: https://microsoft.github.io/language-server-protocol/specifications/specification-3-14/#textDocument_documentHighlight
     fn document_highlight(&self, params: TextDocumentPositionParams) -> Self::HighlightFuture;
+
+
+    /// The [`textDocument/documentSymbol`] request is sent from the client to the server. 
+    ///
+    /// [`textDocument/documentSymbol`]: https://microsoft.github.io/language-server-protocol/specifications/specification-3-14/#textDocument_documentSymbol
+    fn document_symbol(&self, params: DocumentSymbolParams) -> Self::DocumentSymbolFuture;
 }
 
 impl<S: ?Sized + LanguageServer> LanguageServer for Box<S> {
@@ -279,6 +291,7 @@ impl<S: ?Sized + LanguageServer> LanguageServer for Box<S> {
     type CompletionFuture = S::CompletionFuture;
     type HoverFuture = S::HoverFuture;
     type HighlightFuture = S::HighlightFuture;
+    type DocumentSymbolFuture = S::DocumentSymbolFuture;
 
     fn initialize(&self, printer: &Printer, params: InitializeParams) -> Result<InitializeResult> {
         (**self).initialize(printer, params)
@@ -339,4 +352,9 @@ impl<S: ?Sized + LanguageServer> LanguageServer for Box<S> {
     fn document_highlight(&self, params: TextDocumentPositionParams) -> Self::HighlightFuture {
         (**self).document_highlight(params)
     }
+
+    fn document_symbol(&self, params: DocumentSymbolParams) -> Self::DocumentSymbolFuture {
+        (**self).document_symbol(params)
+    }
+
 }

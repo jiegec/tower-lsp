@@ -87,6 +87,10 @@ impl LanguageServer for Backend {
     fn document_highlight(&self, _: TextDocumentPositionParams) -> Self::HighlightFuture {
         Box::new(future::ok(None))
     }
+
+    fn document_symbol(&self, _: DocumentSymbolParams) -> Self::DocumentSymbolFuture {
+        Box::new(future::ok(None))
+    }
 }
 
 fn main() {

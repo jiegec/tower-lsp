@@ -89,6 +89,9 @@ pub trait LanguageServerCore {
 
     #[rpc(name = "textDocument/documentHighlight", raw_params)]
     fn document_highlight(&self, params: Params) -> BoxFuture<Option<Vec<DocumentHighlight>>>;
+
+    #[rpc(name = "textDocument/documentSymbol", raw_params)]
+    fn document_symbol(&self, params: Params) -> BoxFuture<Option<DocumentSymbolResponse>>;
 }
 
 /// Wraps the language server backend and provides a `Printer` for sending notifications.
@@ -239,6 +242,10 @@ impl<T: LanguageServer> LanguageServerCore for Delegate<T> {
         self.delegate_request::<DocumentHighlightRequest, _>(params, |p| {
             Box::new(self.server.document_highlight(p))
         })
+    }
+
+    fn document_symbol(&self, params: Params) -> BoxFuture<Option<DocumentSymbolResponse>> {
+        self.delegate_request::<DocumentSymbolRequest, _>(params, |p| Box::new(self.server.document_symbol(p)))
     }
 }
 
