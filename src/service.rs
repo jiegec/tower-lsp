@@ -188,6 +188,7 @@ mod tests {
         type CompletionFuture = BoxFuture<Option<CompletionResponse>>;
         type HighlightFuture = BoxFuture<Option<Vec<DocumentHighlight>>>;
         type HoverFuture = BoxFuture<Option<Hover>>;
+        type FoldingRangeFuture = BoxFuture<Vec<FoldingRange>>;
 
         fn initialize(&self, _: &Printer, _: InitializeParams) -> Result<InitializeResult> {
             Ok(InitializeResult::default())
@@ -218,6 +219,10 @@ mod tests {
         }
 
         fn document_symbol(&self, _: DocumentSymbolParams) -> Self::DocumentSymbolFuture {
+            Box::new(future::ok(None))
+        }
+
+        fn folding_range(&self, _: FoldingRangeParams) -> Self::FoldingRangeFuture {
             Box::new(future::ok(None))
         }
     }

@@ -92,6 +92,9 @@ pub trait LanguageServerCore {
 
     #[rpc(name = "textDocument/documentSymbol", raw_params)]
     fn document_symbol(&self, params: Params) -> BoxFuture<Option<DocumentSymbolResponse>>;
+
+    #[rpc(name = "textDocument/foldingRange", raw_params)]
+    fn folding_range(&self, params: Params) -> BoxFuture<Option<Vec<FoldingRange>>>;
 }
 
 /// Wraps the language server backend and provides a `Printer` for sending notifications.
@@ -246,6 +249,10 @@ impl<T: LanguageServer> LanguageServerCore for Delegate<T> {
 
     fn document_symbol(&self, params: Params) -> BoxFuture<Option<DocumentSymbolResponse>> {
         self.delegate_request::<DocumentSymbolRequest, _>(params, |p| Box::new(self.server.document_symbol(p)))
+    }
+
+    fn folding_range(&self, params: Params) -> BoxFuture<Option<Vec<FoldingRange>>> {
+        self.delegate_request::<FoldingRangeRequest, _>(params, |p| Box::new(self.server.folding_range(p)))
     }
 }
 

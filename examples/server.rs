@@ -109,6 +109,9 @@ impl LanguageServer for Backend {
         Box::new(future::ok(None))
     }
 
+    fn folding_range(&self, _: FoldingRangeParams) -> Self::FoldingRangeFuture {
+        Box::new(future::ok(None))
+    }
 }
 
 fn main() {

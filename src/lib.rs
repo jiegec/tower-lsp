@@ -116,6 +116,8 @@ pub trait LanguageServer: Send + Sync + 'static {
     type HighlightFuture: Future<Item = Option<Vec<DocumentHighlight>>, Error = Error> + Send;
     /// Response returned when a document symbol action is requested.
     type DocumentSymbolFuture: Future<Item = Option<DocumentSymbolResponse>, Error = Error> + Send;
+    /// Response returned when a document symbol action is requested.
+    type FoldingRangeFuture: Future<Item = Option<Vec<FoldingRange>>, Error = Error> + Send;
 
     /// The [`initialize`] request is the first request sent from the client to the server.
     ///
@@ -282,6 +284,11 @@ pub trait LanguageServer: Send + Sync + 'static {
     ///
     /// [`textDocument/documentSymbol`]: https://microsoft.github.io/language-server-protocol/specifications/specification-3-14/#textDocument_documentSymbol
     fn document_symbol(&self, params: DocumentSymbolParams) -> Self::DocumentSymbolFuture;
+
+    /// The [`textDocument/foldingRange`] request is sent from the client to the server. 
+    ///
+    /// [`textDocument/foldingRange`]: https://microsoft.github.io/language-server-protocol/specifications/specification-3-14/#textDocument_documentSymbol
+    fn folding_range(&self, params: FoldingRangeParams) -> Self::FoldingRangeFuture;
 }
 
 impl<S: ?Sized + LanguageServer> LanguageServer for Box<S> {
@@ -292,6 +299,7 @@ impl<S: ?Sized + LanguageServer> LanguageServer for Box<S> {
     type HoverFuture = S::HoverFuture;
     type HighlightFuture = S::HighlightFuture;
     type DocumentSymbolFuture = S::DocumentSymbolFuture;
+    type FoldingRangeFuture = S::FoldingRangeFuture;
 
     fn initialize(&self, printer: &Printer, params: InitializeParams) -> Result<InitializeResult> {
         (**self).initialize(printer, params)
@@ -357,4 +365,7 @@ impl<S: ?Sized + LanguageServer> LanguageServer for Box<S> {
         (**self).document_symbol(params)
     }
 
+    fn folding_range(&self, params: FoldingRangeParams) -> Self::FoldingRangeFuture {
+        (**self).folding_range(params)
+    }
 }
