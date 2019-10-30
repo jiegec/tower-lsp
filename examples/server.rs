@@ -14,6 +14,7 @@ impl LanguageServer for Backend {
     type CompletionFuture = BoxFuture<Option<CompletionResponse>>;
     type HoverFuture = BoxFuture<Option<Hover>>;
     type HighlightFuture = BoxFuture<Option<Vec<DocumentHighlight>>>;
+    type GotoDefinition = BoxFuture<Option<GotoDefinitionResponse>>;
 
     fn initialize(&self, _: &Printer, _: InitializeParams) -> Result<InitializeResult> {
         Ok(InitializeResult {
@@ -110,6 +111,14 @@ impl LanguageServer for Backend {
     }
 
     fn folding_range(&self, _: FoldingRangeParams) -> Self::FoldingRangeFuture {
+        Box::new(future::ok(None))
+    }
+
+    fn definition(&self, _: TextDocumentPositionParams) -> Self::GotoDefinitionFuture {
+        Box::new(future::ok(None))
+    }
+
+    fn declaration(&self, _: TextDocumentPositionParams) -> Self::GotoDefinitionFuture {
         Box::new(future::ok(None))
     }
 }

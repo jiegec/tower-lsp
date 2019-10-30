@@ -87,6 +87,7 @@ pub use self::stdio::Server;
 use futures::Future;
 use jsonrpc_core::{Error, Result};
 use lsp_types::*;
+use lsp_types::request::*;
 use serde_json::Value;
 
 mod codec;
@@ -118,6 +119,8 @@ pub trait LanguageServer: Send + Sync + 'static {
     type DocumentSymbolFuture: Future<Item = Option<DocumentSymbolResponse>, Error = Error> + Send;
     /// Response returned when a document symbol action is requested.
     type FoldingRangeFuture: Future<Item = Option<Vec<FoldingRange>>, Error = Error> + Send;
+    /// Response returned when a document symbol action is requested.
+    type GotoDefinitionFuture: Future<Item = Option<GotoDefinitionResponse>, Error = Error> + Send;
 
     /// The [`initialize`] request is the first request sent from the client to the server.
     ///
@@ -289,6 +292,16 @@ pub trait LanguageServer: Send + Sync + 'static {
     ///
     /// [`textDocument/foldingRange`]: https://microsoft.github.io/language-server-protocol/specifications/specification-3-14/#textDocument_documentSymbol
     fn folding_range(&self, params: FoldingRangeParams) -> Self::FoldingRangeFuture;
+
+    /// The [`textDocument/definition`] request is sent from the client to the server. 
+    ///
+    /// [`textDocument/definition`]: https://microsoft.github.io/language-server-protocol/specifications/specification-3-14/#textDocument_documentSymbol
+    fn definition(&self, params: TextDocumentPositionParams) -> Self::GotoDefinitionFuture;
+
+    /// The [`textDocument/declaration`] request is sent from the client to the server. 
+    ///
+    /// [`textDocument/declaration`]: https://microsoft.github.io/language-server-protocol/specifications/specification-3-14/#textDocument_documentSymbol
+    fn declaration(&self, params: TextDocumentPositionParams) -> Self::GotoDefinitionFuture;
 }
 
 impl<S: ?Sized + LanguageServer> LanguageServer for Box<S> {
@@ -300,6 +313,7 @@ impl<S: ?Sized + LanguageServer> LanguageServer for Box<S> {
     type HighlightFuture = S::HighlightFuture;
     type DocumentSymbolFuture = S::DocumentSymbolFuture;
     type FoldingRangeFuture = S::FoldingRangeFuture;
+    type GotoDefinitionFuture = S::GotoDefinitionFuture;
 
     fn initialize(&self, printer: &Printer, params: InitializeParams) -> Result<InitializeResult> {
         (**self).initialize(printer, params)
@@ -367,5 +381,13 @@ impl<S: ?Sized + LanguageServer> LanguageServer for Box<S> {
 
     fn folding_range(&self, params: FoldingRangeParams) -> Self::FoldingRangeFuture {
         (**self).folding_range(params)
+    }
+
+    fn definition(&self, params: TextDocumentPositionParams) -> Self::GotoDefinitionFuture {
+        (**self).definition(params)
+    }
+
+    fn declaration(&self, params: TextDocumentPositionParams) -> Self::GotoDefinitionFuture {
+        (**self).declaration(params)
     }
 }
